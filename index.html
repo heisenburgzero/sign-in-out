@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>TVB Sign In/Out</title>
     <style>
         body {
@@ -50,15 +50,69 @@
         <h1>TVB Sign In/Out System</h1>
         <p>Click the appropriate button to sign in or out:</p>
         
-        <form action="https://script.google.com/macros/s/AKfycbwkMNEfE1vCs58eqImQLgf4VQgxHKkx6SmszwCMhLPUHCX1kgMuqnD9Xs4HxNF2ZXpJ7Q/exec" method="POST" style="display: inline;">
-            <input type="hidden" name="action" value="signin">
+        <form method="POST" style="display: inline;">
+            <input type="hidden" name="action" value="signin" />
             <button type="submit" class="button signin">SIGN IN</button>
         </form>
         
-        <form action="https://script.google.com/macros/s/AKfycbwkMNEfE1vCs58eqImQLgf4VQgxHKkx6SmszwCMhLPUHCX1kgMuqnD9Xs4HxNF2ZXpJ7Q/exec" method="POST" style="display: inline;">
-            <input type="hidden" name="action" value="signout">
+        <form method="POST" style="display: inline;">
+            <input type="hidden" name="action" value="signout" />
             <button type="submit" class="button signout">SIGN OUT</button>
         </form>
     </div>
+
+    <script>
+        // Obfuscate webhook URL parts
+        const urlParts = [
+            "https://script.google.com/macros/s/",
+            "AKfycbwkMNEfE1vCs58eqImQLgf4VQgxHKkx6SmszwCMhLPUHCX1kgMuqnD9Xs4HxNF2ZXpJ7Q",
+            "/exec"
+        ];
+        const webhookUrl = urlParts.join("");
+
+        // Set the form action dynamically for all forms
+        window.addEventListener("DOMContentLoaded", () => {
+            document.querySelectorAll("form").forEach(form => {
+                form.action = webhookUrl;
+            });
+
+            // Add submit handlers for AJAX form submission
+            document.querySelectorAll("form").forEach(form => {
+                form.addEventListener("submit", function(event) {
+                    event.preventDefault();
+
+                    const formData = new FormData(form);
+                    const searchParams = new URLSearchParams();
+
+                    formData.forEach((value, key) => {
+                        searchParams.append(key, value);
+                    });
+
+                    fetch(webhookUrl, {
+                        method: "POST",
+                        body: searchParams,
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        }
+                    })
+                    .then(response => {
+                        if (response.ok) return response.text();
+                        throw new Error("Network response was not ok.");
+                    })
+                    .then(text => {
+                        const container = document.querySelector(".container");
+                        container.innerHTML = "<h2>Success! Thank you.</h2><p>Redirecting back shortly...</p>";
+
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 3000);
+                    })
+                    .catch(error => {
+                        alert("Submission failed: " + error.message);
+                    });
+                });
+            });
+        });
+    </script>
 </body>
 </html>
